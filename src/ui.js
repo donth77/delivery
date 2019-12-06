@@ -32,6 +32,12 @@ const inputFields = {
     _.defaults(codeMirrorConfig, {
       mode: 'javascript',
     })),
+  proto: jQuery('.proto').selectize({
+    create: true,
+    createFilter: proto => proto.length > 0,
+    sortField: 'text',
+    placeholder: '',
+  })[0].selectize,
   response: codeMirror.fromTextArea(
     root.querySelector('.response'),
     _.defaults(codeMirrorConfig, {
@@ -118,6 +124,10 @@ function onMethodChange(path) {
   });
 }
 
+function onProtoChange(value) {
+  console.log(value);
+}
+
 function onBodyChange(body) {
   const bodyIsJson = hasJson(body.getValue());
   if (bodyIsJson) {
@@ -134,6 +144,7 @@ function onSend(e) {
   e.preventDefault();
   const url = inputFields.url.getValue();
   const method = inputFields.method.getValue();
+  const proto = inputFields.proto.getValue();
   let body = inputFields.body.getValue();
   try {
     body = JSON.stringify(JSON.parse(body));
@@ -144,7 +155,7 @@ function onSend(e) {
     method: inputFields.method.getValue(),
     body,
   });
-  grpcurl.send({ url, method, body }).then(res => {
+  grpcurl.send({ url, method, body, proto }).then(res => {
     inputFields.response.setValue(res + '');
   }).catch((error) => {
     inputFields.response.setValue(error + '');
@@ -242,6 +253,7 @@ logsEvent.addEventListener('change', onLogsChanged);
 inputFields.url.on('change', onUrlChange);
 inputFields.method.on('change', onMethodChange);
 inputFields.body.on('change', onBodyChange);
+inputFields.proto.on('change', onProtoChange);
 inputFields.send.addEventListener('click', onSend);
 inputFields.reset.addEventListener('click', onReset);
 inputFields.logsBtn.addEventListener('click', onLogsToggle);

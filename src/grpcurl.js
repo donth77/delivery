@@ -17,15 +17,20 @@ const grpcurlWrapper = params => new Promise((resolve, reject) => {
   }
 });
 
+const sendWithProto = ({ body, url, method, proto }) => grpcurlWrapper(`-proto ${proto} -d '${body}' ${url} ${method}`);
 const sendWithBody = ({ body, url, method }) => grpcurlWrapper(`-d '${body}' ${url} ${method}`);
 const sendEmpty = ({ url, method }) => grpcurlWrapper(`${url} ${method}`);
 
 const grpcurl = {
   help: () => grpcurlWrapper('-help'),
   version: () => grpcurlWrapper('-version'),
-  send: ({ body, url, method }) => {
+  send: ({ body, url, method, proto }) => {
     const hasBody = body && body.length > 3;
     if (hasBody) {
+      const hasProto = proto && proto.length;
+      if (hasProto) {
+        return sendWithProto({ body, url, method, proto });
+      }
       return sendWithBody({ body, url, method });
     }
     return sendEmpty({ url, method });
